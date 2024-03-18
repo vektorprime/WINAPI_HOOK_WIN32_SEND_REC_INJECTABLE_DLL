@@ -6,6 +6,11 @@
 #include <winsock.h>
 #include <array>
 
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #pragma comment(lib, "Ws2_32.lib")
 
 /// Define the prototyps for function pointers
@@ -21,15 +26,12 @@ Prototyperecv originalrecv = recv;
 int hookedsend(SOCKET s, const char *buf, int len, int flags)
 {
     //modify the data and send
-    //std::array<char, 8> newbuf = { 0 };
-    //for (int x = 0; x < len; ++x)
-    //{
-    //    newbuf.at(x) = buf[x];
-    //    if (x == 6)
-    //    {
-    //        newbuf.at(6) = 0x0b;
-    //    }
-    //}
+    std::array<char, 8> newbuf = { 0 };
+    if (newbuf.at(4) == 0xd1 &&
+        newbuf.at(5) == 0x58)
+    {
+        newbuf.at(6) = 0x01;
+    }
 
     // Call the original send with the modified data
     return originalsend(s, buf, len, flags);
