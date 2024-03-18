@@ -18,9 +18,11 @@ typedef int(WINAPI *Prototypesend)(SOCKET s, const char* buf, int len, int flags
 typedef int(WINAPI *Prototyperecv)(SOCKET s, char *buf,       int len, int flags);
 
 // Pointer to the original functions
-Prototypesend originalsend = send;
-Prototyperecv originalrecv = recv;
+//Prototypesend originalsend = send;
+//Prototyperecv originalrecv = recv;
 
+Prototypesend originalsend;
+Prototyperecv originalrecv;
 
 // Hooked send function
 int hookedsend(SOCKET s, const char *buf, int len, int flags)
@@ -71,6 +73,25 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
     switch (fdwReason)
     {
          case DLL_PROCESS_ATTACH:
+             /////////        /////////        /////////        /////////
+             // Get the address of the send function
+             originalsend = (Prototypesend)GetProcAddress(GetModuleHandle(TEXT("ws2_32.dll")), "send");
+             if (originalsend == NULL)
+             {
+                 // Error handling
+                 return FALSE;
+             }
+
+             // Get the address of the recv function
+             originalrecv = (Prototyperecv)GetProcAddress(GetModuleHandle(TEXT("wsock32.dll")), "recv");
+             if (originalrecv == NULL)
+             {
+                 // Error handling
+                 return FALSE;
+             }
+             /////////        /////////        /////////        /////////
+
+
             // Get the base address of the current module
             hModule = GetModuleHandle(NULL);
             if (hModule == NULL) 
